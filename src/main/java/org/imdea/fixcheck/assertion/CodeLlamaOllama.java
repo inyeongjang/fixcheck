@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Llama3_1Ollama class: assertion generator using the Llama3.1 model through Ollama.
+ * CodeLlamaOllama class: assertion generator using a CodeLlama model through Ollama.
  *
  * @author Facundo Molina <facundo.molina@imdea.org>
  */
@@ -22,7 +22,20 @@ public class CodeLlamaOllama extends AssertionGenerator {
 
   private final String API_URL = "http://localhost:11434/api/generate";
 
-  private final String SYSTEM = "You are an expert programmer that helps complete Java unit tests with test assertions. Don't explain anything just write the tests.";
+  // [CHANGED] Strengthen constraints to prevent non-compilable or missing assertions
+  private final String SYSTEM =
+      "You are an expert Java unit-test assistant. "
+    + "First reason step-by-step internally to choose correct assertions, but NEVER reveal reasoning. "
+    + "Output ONLY compilable Java assertion statements (e.g., assertEquals(...); assertTrue(...); assertFalse(...); "
+    + "assertNotNull(...); assertNull(...);) each ending with a semicolon. "
+    + "Do NOT add imports, variables, methods, classes, try/catch, comments, or code fences. "
+    + "Do NOT modify existing identifiers. "
+    + "Use only identifiers that already exist in the provided test snippet. "
+    + "Prefer precise assertions over generic ones, but if value is unknown, choose the safest compilable assertion "
+    + "(e.g., null/size/bounds checks) to avoid non-compilation. "
+    + "Do not reference undefined symbols. "
+    + "Do not omit assertions if any can be safely added.";
+
   public CodeLlamaOllama() {}
 
   @Override
@@ -42,23 +55,31 @@ public class CodeLlamaOllama extends AssertionGenerator {
   }
 
   /**
-   * Generate the prompt for the model. The prompt will have the following format:
-   * 'Given the following Java test case:'
-   *   <test case code>
-   * 'Produce as output assertions for the following test case:'
-   *   <prefix code>
-   *
-   * @param prefix Prefix to generate the prompt for
-   * @return Prompt for the model
+   * Generate the prompt for the model.
    */
   private String generatePrompt(Prefix prefix) {
-    String prompt = "You are an expert programmer that helps complete Java unit tests with test assertions. " +
-        "Avoid using text. Don't explain anything just complete the given code snippet with the " +
-        "corresponding test assertions";
+    // [ADDED] Read metadata only from environment variables (fallback to empty string if missing)
+    String rootCause = System.getenv("ROOT_CAUSE");
+    if (rootCause == null) rootCause = "";
+    String errorLocation = System.getenv("ERROR_LOCATION");
+    if (errorLocation == null) errorLocation = "";
+
+    // [CHANGED] Include guardrails in the prompt to avoid non-compilable or missing assertions
+    String prompt =
+        "Complete the following Java unit test by appending ONLY assertion statements that COMPILE.\n"
+      + "Constraints:\n"
+      + "1) Output only assertions (no imports / declarations / comments / extra code).\n"
+      + "2) Use only existing variables/methods/identifiers from the snippet.\n"
+      + "3) Each line must be a valid Java statement ending with a semicolon.\n"
+      + "4) If exact expected values are unclear, use the safest compilable checks (e.g., not-null, size/bounds, predicate) instead of inventing symbols.\n"
+      + "5) Do not reference undefined symbols. Do not change names. Do not add control flow.\n"
+      + "\n"
+      + "### Root Cause:\n" + rootCause + "\n"
+      + "### Error Location:\n" + errorLocation + "\n\n";
+
     prompt += prefix.getParent().getSourceCode() + "\n";
-    //prompt += "Problem: produce the assertions for the following test:\n";
     prompt += prefix.getSourceCode();
-    //prompt += "[/INST]";
+
     // remove the last } so that the model can complete the code
     prompt = replaceLast(prompt, "}", "");
     return prompt;
@@ -69,7 +90,7 @@ public class CodeLlamaOllama extends AssertionGenerator {
     if (index == -1)
       return string;
     return string.substring(0, index) + replacement
-        + string.substring(index+substring.length());
+        + string.substring(index + substring.length());
   }
 
   /**
@@ -85,8 +106,6 @@ public class CodeLlamaOllama extends AssertionGenerator {
       requestBody.put("model", "codellama");
       requestBody.put("system", SYSTEM);
       requestBody.put("prompt", prompt);
-      //requestBody.put("options", new JSONObject().put("stop", new JSONArray().put("\n\n")));
-      //requestBody.put("num_predict", 48);
       requestBody.put("stream", false);
       System.out.println("request: " + requestBody);
       con.setDoOutput(true);
@@ -111,8 +130,6 @@ public class CodeLlamaOllama extends AssertionGenerator {
 
   /**
    * Get assertions as strings from response text
-   * @param text the response
-   * @return a list of assertion strings
    */
   private List<String> getAssertionsFromResponseText(String text) {
     List<String> assertionsStr = new ArrayList<>();
@@ -132,16 +149,15 @@ public class CodeLlamaOllama extends AssertionGenerator {
   }
 
   private boolean isAssertionString(String possibleAssertion) {
-    return possibleAssertion.contains("assertEquals") ||
-        possibleAssertion.contains("assertNotNull") ||
-        possibleAssertion.contains("assertNull") ||
-        possibleAssertion.contains("assertTrue") ||
-        possibleAssertion.contains("assertFalse");
+    return possibleAssertion.contains("assertEquals")
+        || possibleAssertion.contains("assertNotNull")
+        || possibleAssertion.contains("assertNull")
+        || possibleAssertion.contains("assertTrue")
+        || possibleAssertion.contains("assertFalse");
   }
 
   /**
    * Update the class name with a new name
-   * @param prefix Prefix to update
    */
   private void updateClassName(Prefix prefix) {
     String currentClassName = prefix.getClassName();
