@@ -19,6 +19,19 @@ public class OpenAIGPTAssertionGenerator extends AssertionGenerator {
   private static final String API_URL = "https://api.openai.com/v1/chat/completions";
   private static final String API_KEY = System.getenv("OPENAI_API_KEY");
 
+  private static final String SYSTEM =
+      "You are an expert Java unit-test assistant. "
+    + "First reason step-by-step internally to choose correct assertions, but NEVER reveal reasoning. "
+    + "Output ONLY compilable Java assertion statements (e.g., assertEquals(...); assertTrue(...); assertFalse(...); "
+    + "assertNotNull(...); assertNull(...);) each ending with a semicolon. "
+    + "Do NOT add imports, variables, methods, classes, try/catch, comments, or code fences. "
+    + "Do NOT modify existing identifiers. "
+    + "Use only identifiers that already exist in the provided test snippet. "
+    + "Prefer precise assertions over generic ones, but if value is unknown, choose the safest compilable assertion "
+    + "(e.g., null/size/bounds checks) to avoid non-compilation. "
+    + "Do not reference undefined symbols. "
+    + "Do not omit assertions if any can be safely added.";
+
   private final String MODEL;
   private int maxTokens = 256;
   private double temperature = 0.2;
@@ -44,11 +57,31 @@ public class OpenAIGPTAssertionGenerator extends AssertionGenerator {
   }
 
   private String generatePrompt(Prefix prefix) {
-    String prompt = "You are an expert programmer that helps complete Java unit tests with test assertions. " +
-        "Avoid using text. Don't explain anything just complete the given code snippet with the " +
-        "corresponding test assertions";
-    prompt += prefix.getParent().getSourceCode() + "\n";
-    prompt += prefix.getSourceCode();
+    String rootCause = System.getenv("ROOT_CAUSE");
+    if (rootCause == null) rootCause = "";
+    String errorLocation = System.getenv("ERROR_LOCATION");
+    if (errorLocation == null) errorLocation = "";
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Complete the following Java unit test by appending ONLY assertion statements that COMPILE.\n")
+      .append("Constraints:\n")
+      .append("1) Output only assertions (no imports / declarations / comments / extra code).\n")
+      .append("2) Use only existing variables/methods/identifiers from the snippet.\n")
+      .append("3) Each line must be a valid Java statement ending with a semicolon.\n")
+      .append("4) If exact expected values are unclear, use the safest compilable checks (e.g., not-null, size/bounds, predicate) instead of inventing symbols.\n")
+      .append("5) Do not reference undefined symbols. Do not change names. Do not add control flow.\n")
+      .append("\n")
+      .append("### Root Cause:\n")
+      .append(rootCause)
+      .append("\n")
+      .append("### Error Location:\n")
+      .append(errorLocation)
+      .append("\n\n");
+
+    sb.append(prefix.getParent().getSourceCode()).append("\n");
+    sb.append(prefix.getSourceCode());
+
+    String prompt = sb.toString();
     prompt = replaceLast(prompt, "}", "");
     return prompt;
   }
@@ -80,8 +113,7 @@ public class OpenAIGPTAssertionGenerator extends AssertionGenerator {
 
       JSONObject systemMsg = new JSONObject();
       systemMsg.put("role", "system");
-      systemMsg.put("content",
-          "You are an expert programmer that helps complete Java unit tests with test assertions. Don't explain anything just write the tests.");
+      systemMsg.put("content", SYSTEM);
       messages.put(systemMsg);
 
       JSONObject userMsg = new JSONObject();
