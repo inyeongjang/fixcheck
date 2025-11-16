@@ -21,6 +21,8 @@ public class AssertionGeneratorProperty {
     map.put("gpt-3.5", "org.imdea.fixcheck.assertion.GPT3_5Turbo");
     map.put("codellama", "org.imdea.fixcheck.assertion.CodeLlamaOllama");
     map.put("llama3.1", "org.imdea.fixcheck.assertion.Llama3_1Ollama");
+    map.put("gpt-4o", "org.imdea.fixcheck.assertion.OpenAIGPTAssertionGenerator");
+    map.put("gpt-4o-mini", "org.imdea.fixcheck.assertion.OpenAIGPTAssertionGenerator");
     return map;
   }
 
