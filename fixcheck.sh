@@ -19,7 +19,7 @@ test-methods=$target_test_methods
 test-classes-src=$target_test_dir
 test-failure-trace-log=$original_failure_log
 inputs-class=$inputs_class
-number-of-prefixes=100
+number-of-prefixes=10
 assertion-generator=$assertion_generation
 EOF
 echo 'properties file: '$properties_file
