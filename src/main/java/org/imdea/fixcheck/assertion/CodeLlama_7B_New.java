@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Facundo Molina <facundo.molina@imdea.org>
  */
-public class CodeLlamaOllama extends AssertionGenerator {
+public class CodeLlama_7B_New extends AssertionGenerator {
 
   private final String API_URL = "http://localhost:11434/api/generate";
 
@@ -36,7 +36,7 @@ public class CodeLlamaOllama extends AssertionGenerator {
     + "Do not reference undefined symbols. "
     + "Do not omit assertions if any can be safely added.";
 
-  public CodeLlamaOllama() {}
+  public CodeLlama_7B_New() {}
 
   @Override
   public void generateAssertions(Prefix prefix) {
