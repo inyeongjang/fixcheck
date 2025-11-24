@@ -19,10 +19,19 @@ public class AssertionGeneratorProperty {
     map.put("previous-assertion", "org.imdea.fixcheck.assertion.UsePreviousAssertGenerator");
     map.put("replit-code-llm", "org.imdea.fixcheck.assertion.ReplitCodeLLM");
     map.put("gpt-3.5", "org.imdea.fixcheck.assertion.GPT3_5Turbo");
-    map.put("codellama", "org.imdea.fixcheck.assertion.CodeLlamaOllama");
-    map.put("llama3.1", "org.imdea.fixcheck.assertion.Llama3_1Ollama");
-    map.put("gpt-4o", "org.imdea.fixcheck.assertion.OpenAIGPTAssertionGenerator");
-    map.put("gpt-4o-mini", "org.imdea.fixcheck.assertion.OpenAIGPTAssertionGenerator");
+    
+    map.put("codellama7b", "org.imdea.fixcheck.assertion.CodeLlama_7B");
+    map.put("codellama7b-new", "org.imdea.fixcheck.assertion.CodeLlama_7B_New");
+    
+    map.put("codellama13b", "org.imdea.fixcheck.assertion.CodeLlama_13B");
+    map.put("codellama13b-new", "org.imdea.fixcheck.assertion.CodeLlama_13B_New");
+    
+    map.put("llama", "org.imdea.fixcheck.assertion.Llama_Ollama");
+    map.put("llama-new", "org.imdea.fixcheck.assertion.Llama_Ollama_New");
+    
+    map.put("gpt", "org.imdea.fixcheck.assertion.OpenAI_GPT");
+    map.put("gpt-new", "org.imdea.fixcheck.assertion.OpenAI_GPT_New");
+    
     return map;
   }
 
