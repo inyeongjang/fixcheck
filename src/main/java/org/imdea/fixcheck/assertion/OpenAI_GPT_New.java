@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenAIGPTAssertionGenerator extends AssertionGenerator {
+public class OpenAI_GPT_New extends AssertionGenerator {
 
   private static final String API_URL = "https://api.openai.com/v1/chat/completions";
   private static final String API_KEY = System.getenv("OPENAI_API_KEY");
@@ -36,7 +36,7 @@ public class OpenAIGPTAssertionGenerator extends AssertionGenerator {
   private int maxTokens = 256;
   private double temperature = 0.2;
 
-  public OpenAIGPTAssertionGenerator() {
+  public OpenAI_GPT_New() {
     String envModel = System.getenv("OPENAI_MODEL");
     this.MODEL = (envModel != null && !envModel.isEmpty()) ? envModel : "gpt-4o-mini";
   }
