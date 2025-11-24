@@ -15,17 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Llama3_1Ollama class: assertion generator using the Llama3.1 model through Ollama.
+ * Llama_Ollama class: assertion generator using the Llama3.2 model through Ollama.
  *
  * @author Facundo Molina <facundo.molina@imdea.org>
  */
-public class Llama3_1Ollama extends AssertionGenerator {
+public class Llama_Ollama extends AssertionGenerator {
 
   private final String API_URL = "http://localhost:11434/api/generate";
 
   private final String SYSTEM = "You are an assertion generator, that is, you generate meaningful test assertions for " +
       "Java tests";
-  public Llama3_1Ollama() {}
+  public Llama_Ollama() {}
 
   @Override
   public void generateAssertions(Prefix prefix) {
@@ -84,7 +84,7 @@ public class Llama3_1Ollama extends AssertionGenerator {
       con.setRequestMethod("POST");
       con.setRequestProperty("Content-Type", "application/json");
       JSONObject requestBody = new JSONObject();
-      requestBody.put("model", "llama3.1");
+      requestBody.put("model", "llama3.2:3b");
       requestBody.put("system", SYSTEM);
       requestBody.put("prompt", prompt);
       requestBody.put("options", new JSONObject().put("stop", new JSONArray().put("}")));
@@ -146,7 +146,7 @@ public class Llama3_1Ollama extends AssertionGenerator {
    */
   private void updateClassName(Prefix prefix) {
     String currentClassName = prefix.getClassName();
-    String newClassName = currentClassName + "withLlama3_1";
+    String newClassName = currentClassName + "withLlama";
     prefix.setClassName(newClassName);
     CompilationUnit compilationUnit = prefix.getMethodCompilationUnit();
     compilationUnit.getClassByName(currentClassName).get().setName(newClassName);
