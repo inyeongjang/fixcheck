@@ -36,8 +36,12 @@ public class Llama_Ollama_New extends AssertionGenerator {
   @Override
   public void generateAssertions(Prefix prefix) {
     String prompt = generatePrompt(prefix);
+    System.out.println("prompt:");
+    System.out.println(prompt);
     String responseText = performCall(prompt);
     List<String> assertionsStr = getAssertionsFromResponseText(responseText);
+    System.out.println("---> assertions: " + assertionsStr);
+    System.out.println();
     AssertionsHelper.appendAssertionsToPrefix(assertionsStr, prefix);
     updateClassName(prefix);
   }
@@ -88,20 +92,27 @@ public class Llama_Ollama_New extends AssertionGenerator {
       requestBody.put("prompt", prompt);
       requestBody.put("options", new JSONObject().put("stop", new JSONArray().put("}")));
       requestBody.put("stream", false);
+      System.out.println("request: " + requestBody);
 
       con.setDoOutput(true);
       con.getOutputStream().write(requestBody.toString().getBytes("UTF-8"));
 
       BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      StringBuilder response = new StringBuilder();
-      String line;
-      while ((line = in.readLine()) != null) response.append(line);
+      String inputLine;
+      StringBuffer response = new StringBuffer();
+      while ((inputLine = in.readLine()) != null) {
+        response.append(inputLine);
+      }
       in.close();
 
       JSONObject jsonResponse = new JSONObject(response.toString());
-      return jsonResponse.getString("response");
+      String completion = jsonResponse.getString("response");
+      System.out.println("---> response: " + completion);
+      return completion;
 
     } catch (Exception e) {
+      System.out.println("Error while performing the call to the model llama3.2 through Ollama");
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
