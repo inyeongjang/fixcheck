@@ -18,8 +18,9 @@ public class Llama_Ollama extends AssertionGenerator {
 
   private final String API_URL = "http://localhost:11434/api/generate";
 
-  private final String SYSTEM = "You are an assertion generator, that is, you generate meaningful test assertions for " +
-      "Java tests";
+  private final String SYSTEM =
+      "You are an expert programmer that helps complete Java unit tests with test assertions. "
+    + "Don't explain anything just write the tests.";
 
   public Llama_Ollama() {}
 
@@ -37,7 +38,10 @@ public class Llama_Ollama extends AssertionGenerator {
   }
 
   private String generatePrompt(Prefix prefix) {
-    String prompt = "Complete the second Java unit test with assertions:\n";
+    String prompt =
+        "You are an expert programmer that helps complete Java unit tests with test assertions. "
+      + "Avoid using text. Don't explain anything just complete the given code snippet with the "
+      + "corresponding test assertions";
     prompt += prefix.getParent().getSourceCode() + "\n";
     prompt += prefix.getSourceCode();
     prompt = replaceLast(prompt, "}", "");
