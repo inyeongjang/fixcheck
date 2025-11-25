@@ -18,18 +18,18 @@ public class Llama_Ollama_New extends AssertionGenerator {
 
   private static final String API_URL = "http://localhost:11434/api/generate";
 
-  private static final String SYSTEM =
-      "You are an expert Java unit-test assistant. "
-    + "First reason step-by-step internally to choose correct assertions, but NEVER reveal reasoning. "
-    + "Output ONLY compilable Java assertion statements (e.g., assertEquals(...); assertTrue(...); assertFalse(...); "
-    + "assertNotNull(...); assertNull(...);) each ending with a semicolon. "
-    + "Do NOT add imports, variables, methods, classes, try/catch, comments, or code fences. "
-    + "Do NOT modify existing identifiers. "
-    + "Use only identifiers that already exist in the provided test snippet. "
-    + "Prefer precise assertions over generic ones, but if value is unknown, choose the safest compilable assertion "
-    + "(e.g., null/size/bounds checks). "
-    + "Do not reference undefined symbols. "
-    + "Do not omit assertions if any can be safely added.";
+private static final String SYSTEM =
+    "You are an expert Java unit-test assistant. "
+  + "First reason step-by-step internally to choose correct assertions, but NEVER reveal reasoning. "
+  + "Output ONLY compilable Java assertion statements (e.g., assertEquals(...); assertTrue(...); assertFalse(...); "
+  + "assertNotNull(...); assertNull(...);) each ending with a semicolon. "
+  + "Do NOT add imports, variables, methods, classes, try/catch, comments, or code fences. "
+  + "Do NOT modify existing identifiers. "
+  + "Use only identifiers that already exist in the provided test snippet. "
+  + "Prefer precise assertions over generic ones, but if value is unknown, choose the safest compilable assertion "
+  + "(e.g., null/size/bounds checks) to avoid non-compilation. "
+  + "Do not reference undefined symbols. "
+  + "Do not omit assertions if any can be safely added.";
 
   public Llama_Ollama_New() {}
 
@@ -58,7 +58,7 @@ public class Llama_Ollama_New extends AssertionGenerator {
       .append("1) Output only assertions (no imports/declarations/comments/extra code).\n")
       .append("2) Use only existing variables/methods/identifiers from the snippet.\n")
       .append("3) Each line must be a valid Java statement ending with a semicolon.\n")
-      .append("4) If exact expected values are unclear, use the safest compilable checks (e.g., not-null, size/bounds).\n")
+      .append("4) If exact expected values are unclear, use the safest compilable checks (e.g., not-null, size/bounds, predicate) instead of inventing symbols.\n")
       .append("5) Do not reference undefined symbols. Do not change names. Do not add control flow.\n\n")
       .append("### Root Cause:\n")
       .append(rootCause)
