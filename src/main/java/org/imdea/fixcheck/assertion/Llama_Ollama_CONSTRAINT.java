@@ -20,7 +20,8 @@ public class Llama_Ollama_CONSTRAINT extends AssertionGenerator {
 
   private final String SYSTEM =
       "You are an expert programmer that helps complete Java unit tests with test assertions. "
-    + "Don't explain anything just write the tests.";
+    + "Don't explain anything just write the tests. "
+    + "Use only variables that are in scope at the end of the test method. Do not invent or assume any methods, classes, fields, or return values. Do not reference objects that were never initialized or may not exist.";
 
   public Llama_Ollama_CONSTRAINT() {}
 
